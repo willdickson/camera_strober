@@ -1,6 +1,6 @@
 ##  camera_strober
 
-Arduino firmware/software for controlling camera during muscle imaging. 
+Arduino firmware and Python library for controlling camera during muscle imaging. 
 
 ## Firmware
 
