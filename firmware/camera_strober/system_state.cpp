@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "constants.h"
+#include "Streaming.h"
 #include "system_state.h"
 
 
@@ -9,10 +9,12 @@ SystemState::SystemState() { };
 // ----------------------------------------------------------------------------
 
 void SystemState::initialize() {
-  pinMode(CAM_LEFT_TRIG_PIN, OUTPUT);
-  pinMode(CAM_RIGHT_TRIG_PIN, OUTPUT);
-  pinMode(LED_PIN, OUTPUT);  
-  pinMode(WB_PIN, INPUT_PULLUP);
+
+    Serial.begin(9600);
+    pinMode(CAM_LEFT_TRIG_PIN, OUTPUT);
+    pinMode(CAM_RIGHT_TRIG_PIN, OUTPUT);
+    pinMode(LED_PIN, OUTPUT);  
+    pinMode(WB_PIN, INPUT_PULLUP);
 }
 
 
@@ -64,7 +66,7 @@ void SystemState::update_on_loop() {
         // Turn and LED and, if this is the first pulse, the cameras
         uint32_t wb_dt_avg = avg_buffer_.average();
         uint32_t dt_since_last_wb = t - last_wb_t_;
-        if (dt_since_last_wb > (wb_dt_avg*WB_TRIG_PERCENT)/100) {
+        if (dt_since_last_wb > (wb_dt_avg*wb_trig_percent_)/100) {
             digitalWrite(LED_PIN, HIGH); 
             if (pulse_count_ == 0) { 
                 digitalWrite(CAM_LEFT_TRIG_PIN, HIGH);
@@ -86,6 +88,66 @@ void SystemState::update_on_loop() {
                 pulse_count_ = 0;
             }
         }
+    }
+}
+
+void SystemState::process_messages()
+{
+    while (Serial.available() > 0) {
+        receiver_.process(Serial.read());
+        if (receiver_.messageReady()) {
+            uint8_t cmd_num = receiver_.readInt(0);
+            uint8_t cmd_val = receiver_.readInt(1);
+            handle_message(cmd_num, cmd_val);
+        }
+    }
+}
+
+void SystemState::handle_message(uint8_t cmd_num, uint8_t cmd_val) {
+
+    switch (cmd_num) {
+
+        case CMD_SET_WB_PERCENT:
+            wb_trig_percent_ = constrain(cmd_val,0,100);
+            break;
+
+        case CMD_GET_WB_PERCENT:
+            Serial << wb_trig_percent_ << endl;
+            break;
+
+        case CMD_CAM_ENABLED:
+            if (cmd_val == CAMERA_LEFT) {
+                cam_left_enabled_ = true;
+                pinMode(CAM_LEFT_TRIG_PIN, OUTPUT);
+            } 
+            if (cmd_val == CAMERA_RIGHT) {
+                cam_right_enabled_ = true;
+                pinMode(CAM_RIGHT_TRIG_PIN, OUTPUT);
+            }
+
+            break;
+
+        case CMD_CAM_DISABLED:
+            if (cmd_val == CAMERA_LEFT) {
+                cam_left_enabled_ = false;
+                pinMode(CAM_LEFT_TRIG_PIN, INPUT);
+            } 
+            if (cmd_val == CAMERA_RIGHT) {
+                cam_right_enabled_ = false;
+                pinMode(CAM_RIGHT_TRIG_PIN, INPUT);
+            }
+            break;
+
+        case CMD_GET_CAM_ENABLE:
+            if (cmd_val == CAMERA_LEFT) {
+                Serial << cam_left_enabled_ << endl;
+            }
+            if (cmd_val == CAMERA_RIGHT) {
+                Serial << cam_right_enabled_ << endl;
+            }
+            break;
+
+
     }
 }
 

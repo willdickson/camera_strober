@@ -9,7 +9,7 @@ extern const uint32_t WB_AVG_TIMEOUT_US;
 extern const uint32_t WB_FLYING_TIMEOUT_US;
 extern const uint32_t WB_FALLBACK_PERIOD_US;
 extern const uint32_t WB_PER_FRAME;
-extern const uint32_t WB_TRIG_PERCENT;  
+extern const uint32_t WB_DFLT_TRIG_PERCENT;  
 extern const uint32_t LED_PULSE_US;
 
 // Pin assignment
@@ -17,6 +17,17 @@ extern const uint8_t WB_PIN;
 extern const uint8_t CAM_LEFT_TRIG_PIN;
 extern const uint8_t CAM_RIGHT_TRIG_PIN;
 extern const uint8_t LED_PIN;
+
+// Command ids
+const uint8_t CMD_SET_WB_PERCENT = 1;
+const uint8_t CMD_GET_WB_PERCENT = 2;
+const uint8_t CMD_CAM_ENABLED = 3;
+const uint8_t CMD_CAM_DISABLED = 4;
+const uint8_t CMD_GET_CAM_ENABLE = 5;
+
+// Camera ids
+extern const uint8_t CAMERA_LEFT;
+extern const uint8_t CAMERA_RIGHT;
 
 
 #endif
