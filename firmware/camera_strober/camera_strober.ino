@@ -14,7 +14,7 @@ void setup() {
 
 void loop() {
     system_state.process_messages();
-    //system_state.update_on_loop();
+    system_state.update_on_loop();
 }
 
 void wb_isr() {
